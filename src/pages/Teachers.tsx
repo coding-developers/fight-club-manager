@@ -77,7 +77,7 @@ const Teachers = () => {
             )} />
           </div>
           <FormField control={form.control} name="cpf" render={({ field }) => (
-            <FormItem><FormLabel>CPF</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>CPF</FormLabel><FormControl><MaskedInput mask="999.999.999-99" placeholder="000.000.000-00" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
           <FormField control={form.control} name="status" render={({ field }) => (
             <FormItem>
