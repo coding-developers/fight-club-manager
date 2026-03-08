@@ -5,6 +5,7 @@ import { studentSchema } from "@/schemas";
 import { useCrudState } from "@/hooks/useCrudState";
 import { DataTable } from "@/components/DataTable";
 import { Input } from "@/components/ui/input";
+import { MaskedInput } from "@/components/ui/masked-input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
