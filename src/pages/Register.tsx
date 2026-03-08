@@ -20,7 +20,12 @@ const Register = () => {
   });
 
   const onSubmit = async (data: RegisterForm) => {
-    await registerUser(data);
+    await registerUser({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      confirmPassword: data.confirmPassword,
+    });
   };
 
   return (
