@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { loginSchema } from "@/schemas";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,11 @@ import { Swords } from "lucide-react";
 type LoginForm = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, isAuthenticated } = useAuth();
+
+  if (isAuthenticated) {
+    return <Navigate to="/admin" replace />;
+  }
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
