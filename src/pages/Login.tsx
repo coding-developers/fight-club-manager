@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { loginSchema } from "@/schemas";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
