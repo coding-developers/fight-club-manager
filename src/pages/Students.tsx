@@ -5,6 +5,7 @@ import { studentSchema } from "@/schemas";
 import { useCrudState } from "@/hooks/useCrudState";
 import { DataTable } from "@/components/DataTable";
 import { Input } from "@/components/ui/input";
+import { MaskedInput } from "@/components/ui/masked-input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
@@ -78,12 +79,12 @@ const Students = () => {
               <FormItem><FormLabel>E-mail</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="phone" render={({ field }) => (
-              <FormItem><FormLabel>Telefone</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>Telefone</FormLabel><FormControl><MaskedInput mask="(99) 99999-9999" placeholder="(00) 00000-0000" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <FormField control={form.control} name="cpf" render={({ field }) => (
-              <FormItem><FormLabel>CPF</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>CPF</FormLabel><FormControl><MaskedInput mask="999.999.999-99" placeholder="000.000.000-00" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="dateOfBirth" render={({ field }) => (
               <FormItem><FormLabel>Data de Nascimento</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>

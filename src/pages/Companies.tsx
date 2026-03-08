@@ -5,6 +5,7 @@ import { companySchema } from "@/schemas";
 import { useCrudState } from "@/hooks/useCrudState";
 import { DataTable } from "@/components/DataTable";
 import { Input } from "@/components/ui/input";
+import { MaskedInput } from "@/components/ui/masked-input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
@@ -70,7 +71,7 @@ const Companies = () => {
           )} />
           <div className="grid grid-cols-2 gap-4">
             <FormField control={form.control} name="cnpj" render={({ field }) => (
-              <FormItem><FormLabel>CNPJ</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>CNPJ</FormLabel><FormControl><MaskedInput mask="99.999.999/9999-99" placeholder="00.000.000/0000-00" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="email" render={({ field }) => (
               <FormItem><FormLabel>E-mail</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
@@ -78,7 +79,7 @@ const Companies = () => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <FormField control={form.control} name="phone" render={({ field }) => (
-              <FormItem><FormLabel>Telefone</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>Telefone</FormLabel><FormControl><MaskedInput mask="(99) 99999-9999" placeholder="(00) 00000-0000" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="address" render={({ field }) => (
               <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
