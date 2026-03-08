@@ -13,7 +13,11 @@ import { Swords } from "lucide-react";
 type LoginForm = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, isAuthenticated } = useAuth();
+
+  if (isAuthenticated) {
+    return <Navigate to="/admin" replace />;
+  }
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
