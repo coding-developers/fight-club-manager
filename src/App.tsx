@@ -3,6 +3,13 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+
+const RootRedirect = () => {
+  const { isAuthenticated, isLoadingPages } = useAuth();
+  if (isLoadingPages) return null;
+  return <Navigate to={isAuthenticated ? "/admin" : "/login"} replace />;
+};
 import { AuthProvider } from "@/contexts/AuthContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -38,7 +45,7 @@ const App = () => (
                 <Route path="companies" element={<Companies />} />
               </Route>
             </Route>
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/" element={<RootRedirect />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
