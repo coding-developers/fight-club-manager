@@ -11,7 +11,6 @@ import {
   SidebarGroupContent,
 } from "@/components/ui/sidebar";
 import {
-  Swords,
   LayoutDashboard,
   Users,
   Dumbbell,
@@ -36,11 +35,11 @@ export const AdminSidebar = () => {
     <Sidebar>
       <SidebarHeader className="p-4">
         <Link to="/admin" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-            <Swords className="h-5 w-5 text-primary-foreground" />
+          <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center">
+            <img src="/img/logo-chess.svg" alt="Logo" className="h-7 w-7" color="white" />
           </div>
           <div>
-            <h1 className="text-base font-display font-bold text-sidebar-foreground">Fight Academy</h1>
+            <h1 className="text-base font-display font-bold text-sidebar-foreground">Chess Hall</h1>
             <p className="text-xs text-sidebar-foreground/60">Painel Admin</p>
           </div>
         </Link>

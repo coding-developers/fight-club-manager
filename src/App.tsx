@@ -14,33 +14,36 @@ import Teachers from "./pages/Teachers";
 import Products from "./pages/Products";
 import Companies from "./pages/Companies";
 import NotFound from "./pages/NotFound";
+import PrivateRoute from "./components/PrivateRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="students" element={<Students />} />
-              <Route path="modalities" element={<Modalities />} />
-              <Route path="teachers" element={<Teachers />} />
-              <Route path="products" element={<Products />} />
-              <Route path="companies" element={<Companies />} />
+            <Route element={<PrivateRoute />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="students" element={<Students />} />
+                <Route path="modalities" element={<Modalities />} />
+                <Route path="teachers" element={<Teachers />} />
+                <Route path="products" element={<Products />} />
+                <Route path="companies" element={<Companies />} />
+              </Route>
             </Route>
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+        </TooltipProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </QueryClientProvider>
 );
 

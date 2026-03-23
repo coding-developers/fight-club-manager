@@ -1,97 +1,166 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { teacherSchema } from "@/schemas";
+import { staffSchema } from "@/schemas";
 import { useCrudState } from "@/hooks/useCrudState";
 import { DataTable } from "@/components/DataTable";
 import { Input } from "@/components/ui/input";
-import { MaskedInput } from "@/components/ui/masked-input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import type { Teacher } from "@/types";
+import type { Company, Staff } from "@/types";
 import { useEffect } from "react";
+import useFetch from "@/hooks/useFetch/hook";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
-type TeacherForm = z.infer<typeof teacherSchema>;
+type StaffForm = z.infer<typeof staffSchema>;
 
 const columns = [
-  { key: "name", label: "Nome" },
-  { key: "email", label: "E-mail" },
-  { key: "phone", label: "Telefone" },
+  { key: "company_id", label: "Empresa" },
+  { key: "student_id", label: "Aluno" },
+  { key: "role", label: "Função" },
+  { key: "hired_at", label: "Contratado em" },
   { key: "status", label: "Status" },
 ];
 
 const Teachers = () => {
-  const { items, editingItem, isFormOpen, create, update, remove, openCreate, openEdit, closeForm } =
-    useCrudState<Teacher>("teachers");
+  const [request, , data] = useFetch<Staff[]>();
+  const [requestCompanies, , dataCompanies] = useFetch<Company[]>();
+  const [requestCreate] = useFetch<Staff>();
+  const [requestUpdate] = useFetch<Staff>();
+  const [requestDelete] = useFetch<Staff>();
+  const { user } = useAuth();
+  const { editingItem, isFormOpen, openCreate, openEdit, closeForm } =
+    useCrudState<Staff>("staff");
 
-  const form = useForm<TeacherForm>({
-    resolver: zodResolver(teacherSchema),
-    defaultValues: { name: "", email: "", phone: "", cpf: "", modalities: [], status: "active" },
+  const form = useForm<StaffForm>({
+    resolver: zodResolver(staffSchema),
+    defaultValues: {
+      company_id: 0, student_id: 0, status: "active",
+      hired_at: "", fired_at: "", role: 0,
+    },
   });
 
+  const refresh = () =>
+    request("/staff/", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${user.access}` },
+    });
+
   useEffect(() => {
+    refresh();
+    requestCompanies("/companies/", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${user.access}` },
+    });
     if (editingItem) {
       form.reset({
-        name: editingItem.name, email: editingItem.email, phone: editingItem.phone,
-        cpf: editingItem.cpf, modalities: editingItem.modalities, status: editingItem.status,
+        company_id: editingItem.company_id,
+        student_id: editingItem.student_id,
+        status: editingItem.status,
+        hired_at: editingItem.hired_at?.split("T")[0] ?? "",
+        fired_at: editingItem.fired_at?.split("T")[0] ?? "",
+        role: editingItem.role,
       });
     } else {
-      form.reset({ name: "", email: "", phone: "", cpf: "", modalities: [], status: "active" });
+      form.reset({
+        company_id: 0, student_id: 0, status: "active",
+        hired_at: "", fired_at: "", role: 0,
+      });
     }
-  }, [editingItem, isFormOpen]);
+  }, [editingItem, isFormOpen, form]);
 
-  const onSubmit = (data: TeacherForm) => {
+  const onSubmit = (formData: StaffForm) => {
     if (editingItem) {
-      update({ ...editingItem, ...data });
+      requestUpdate(`/staff/${editingItem.id}/`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${user.access}` },
+        body: formData,
+      })
+        .then(() => { toast.success("Staff atualizado com sucesso!"); closeForm(); refresh(); })
+        .catch(() => toast.error("Erro ao atualizar staff."));
     } else {
-      create({ ...data, id: crypto.randomUUID(), createdAt: new Date().toISOString() } as Teacher);
+      requestCreate("/staff/", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${user.access}` },
+        body: formData,
+      })
+        .then(() => { toast.success("Staff cadastrado com sucesso!"); closeForm(); refresh(); })
+        .catch(() => toast.error("Erro ao cadastrar staff."));
     }
-    closeForm();
+  };
+
+  const handleDelete = (id: string) => {
+    requestDelete(`/staff/${id}/`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${user.access}` },
+    })
+      .then(() => { toast.success("Staff excluído com sucesso!"); refresh(); })
+      .catch(() => toast.error("Erro ao excluir staff."));
   };
 
   return (
     <DataTable
-      title="Professores"
-      description="Gerencie os professores da academia"
-      items={items}
+      title="Staff"
+      description="Gerencie a equipe da academia"
+      items={data || []}
       columns={columns}
       onAdd={openCreate}
       onEdit={openEdit}
-      onDelete={remove}
+      onDelete={handleDelete}
       isFormOpen={isFormOpen}
       onCloseForm={closeForm}
-      formTitle={editingItem ? "Editar Professor" : "Novo Professor"}
+      formTitle={editingItem ? "Editar Staff" : "Novo Staff"}
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField control={form.control} name="name" render={({ field }) => (
-            <FormItem><FormLabel>Nome</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-          )} />
           <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="email" render={({ field }) => (
-              <FormItem><FormLabel>E-mail</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+            <FormField control={form.control} name="company_id" render={({ field }) => (
+              <FormItem><FormLabel>Empresa</FormLabel>
+                <Select
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={field.value ? String(field.value) : ""}
+                >
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    {dataCompanies?.map((company) => (
+                      <SelectItem key={company.id} value={String(company.id)}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              <FormMessage /></FormItem>
             )} />
-            <FormField control={form.control} name="phone" render={({ field }) => (
-              <FormItem><FormLabel>Telefone</FormLabel><FormControl><MaskedInput mask="(99) 99999-9999" placeholder="(00) 00000-0000" {...field} /></FormControl><FormMessage /></FormItem>
+            <FormField control={form.control} name="student_id" render={({ field }) => (
+              <FormItem><FormLabel>ID do Aluno</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
           </div>
-          <FormField control={form.control} name="cpf" render={({ field }) => (
-            <FormItem><FormLabel>CPF</FormLabel><FormControl><MaskedInput mask="999.999.999-99" placeholder="000.000.000-00" {...field} /></FormControl><FormMessage /></FormItem>
-          )} />
-          <FormField control={form.control} name="status" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                <SelectContent>
-                  <SelectItem value="active">Ativo</SelectItem>
-                  <SelectItem value="inactive">Inativo</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )} />
+          <div className="grid grid-cols-2 gap-4">
+            <FormField control={form.control} name="hired_at" render={({ field }) => (
+              <FormItem><FormLabel>Data de Contratação</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="fired_at" render={({ field }) => (
+              <FormItem><FormLabel>Data de Demissão</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <FormField control={form.control} name="role" render={({ field }) => (
+              <FormItem><FormLabel>ID da Função</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="status" render={({ field }) => (
+              <FormItem><FormLabel>Status</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="active">Ativo</SelectItem>
+                    <SelectItem value="inactive">Inativo</SelectItem>
+                  </SelectContent>
+                </Select>
+              <FormMessage /></FormItem>
+            )} />
+          </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={closeForm}>Cancelar</Button>
             <Button type="submit">{editingItem ? "Salvar" : "Cadastrar"}</Button>

@@ -16,19 +16,24 @@ export interface AuthUser {
   name: string;
   email: string;
   role: string;
-  token: string;
+  access: string;
+  refresh: string;
 }
 
 // ====== Student ======
 export interface Student {
   id: string;
-  name: string;
-  email: string;
-  phone: string;
-  cpf: string;
-  dateOfBirth: string;
-  modalities: string[];
+  company_id: number;
   status: "active" | "inactive";
+  full_name: string;
+  level: string;
+  document: string;
+  date_of_birth: string;
+  email: string;
+  password?: string;
+  phone_number: string;
+  gender: string;
+  avatar_url?: string;
   createdAt: string;
 }
 
@@ -37,36 +42,40 @@ export type StudentPayload = Omit<Student, "id" | "createdAt">;
 // ====== Modality ======
 export interface Modality {
   id: string;
+  status: string;
   name: string;
-  description: string;
-  status: "active" | "inactive";
+  gym: number;
   createdAt: string;
 }
 
 export type ModalityPayload = Omit<Modality, "id" | "createdAt">;
 
-// ====== Teacher ======
-export interface Teacher {
+// ====== Staff ======
+export interface Staff {
   id: string;
-  name: string;
-  email: string;
-  phone: string;
-  cpf: string;
-  modalities: string[];
+  company_id: number;
+  student_id: number;
   status: "active" | "inactive";
+  hired_at: string;
+  fired_at?: string;
+  role: number;
   createdAt: string;
 }
 
-export type TeacherPayload = Omit<Teacher, "id" | "createdAt">;
+export type StaffPayload = Omit<Staff, "id" | "createdAt">;
 
 // ====== Product ======
 export interface Product {
   id: string;
+  company_id: number;
   name: string;
   description: string;
-  price: number;
+  price: string;
   stock: number;
   status: "active" | "inactive";
+  sku: string;
+  image_url?: string;
+  category: number;
   createdAt: string;
 }
 
@@ -76,11 +85,19 @@ export type ProductPayload = Omit<Product, "id" | "createdAt">;
 export interface Company {
   id: string;
   name: string;
-  cnpj: string;
+  next_date_payment: string;
+  last_date_payment: string;
+  type_document: string;
+  document: string;
+  status: string;
   email: string;
-  phone: string;
-  address: string;
-  status: "active" | "inactive";
+  foundation_date: string;
+  logo?: string;
+  phone_number: string;
+  avatar_url?: string;
+  day_of_payment: number;
+  status_payment: string;
+  founder: number;
   createdAt: string;
 }
 
