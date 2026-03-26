@@ -141,7 +141,7 @@ const Payments = () => {
     if (editingItem) {
       form.reset({
         gym_id: editingItem.gym_id,
-        user_id: editingItem.id,
+        user_id: Number(editingItem.id),
         modality_id: editingItem.modality_id,
         amount: editingItem.amount,
         status: editingItem.status,
@@ -213,7 +213,7 @@ const Payments = () => {
         if (key === "amount") return fmt(item.amount);
         if (key === "payment_method") return METHOD_LABELS[item.payment_method ?? ""] ?? "—";
         if (key === "due_date") return item.due_date ?? "—";
-        return String((item as any)[key] ?? "—");
+        return String((item as Payment)[key as keyof Payment] ?? "—");
       }}
     >
       <Form {...form}>
