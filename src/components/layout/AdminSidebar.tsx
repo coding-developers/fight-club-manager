@@ -17,6 +17,9 @@ import {
   GraduationCap,
   Package,
   Building2,
+  Tag,
+  ShieldCheck,
+  CreditCard,
 } from "lucide-react";
 
 const menuItems = [
@@ -26,6 +29,9 @@ const menuItems = [
   { title: "Professores", url: "/admin/teachers", icon: GraduationCap },
   { title: "Produtos", url: "/admin/products", icon: Package },
   { title: "Academias", url: "/admin/companies", icon: Building2 },
+  { title: "Categorias", url: "/admin/categories", icon: Tag },
+  { title: "Administradores", url: "/admin/admins", icon: ShieldCheck },
+  { title: "Pagamentos", url: "/admin/payments", icon: CreditCard },
 ];
 
 export const AdminSidebar = () => {

@@ -62,6 +62,22 @@ export const productSchema = z.object({
   category: z.coerce.number().min(1, "Categoria obrigatória"),
 });
 
+export const paymentSchema = z.object({
+  gym_id: z.coerce.number().min(1, "Academia obrigatória"),
+  user_id: z.coerce.number().min(1, "Usuário obrigatório"),
+  modality_id: z.coerce.number().optional(),
+  amount: z.string().min(1, "Valor obrigatório"),
+  status: z.enum(["pending", "paid", "overdue", "cancelled"]),
+  payment_method: z.enum(["cash", "card", "pix", "transfer"]).optional(),
+  due_date: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export const categorySchema = z.object({
+  name: z.string().min(2, "Mínimo 2 caracteres"),
+  description: z.string().optional(),
+});
+
 export const companySchema = z.object({
   name: z.string().min(2, "Mínimo 2 caracteres"),
   document: z.string().min(11, "Documento inválido"),

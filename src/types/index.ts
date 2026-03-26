@@ -89,6 +89,23 @@ export interface Product {
 
 export type ProductPayload = Omit<Product, "id" | "createdAt">;
 
+// ====== Payment ======
+export interface Payment {
+  id: string;
+  gym_id: number;
+  user_id: number;
+  user?: Student;
+  modality_id?: number;
+  amount: string;
+  status: "pending" | "paid" | "overdue" | "cancelled";
+  payment_method?: "cash" | "card" | "pix" | "transfer";
+  due_date?: string;
+  paid_at?: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // ====== Category ======
 export interface Category {
   id: string;

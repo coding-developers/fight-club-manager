@@ -20,6 +20,9 @@ import Modalities from "./pages/Modalities";
 import Teachers from "./pages/Teachers";
 import Products from "./pages/Products";
 import Companies from "./pages/Companies";
+import Categories from "./pages/Categories";
+import Admins from "./pages/Admins";
+import Payments from "./pages/Payments";
 import NotFound from "./pages/NotFound";
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -43,6 +46,9 @@ const App = () => (
                 <Route path="teachers" element={<Teachers />} />
                 <Route path="products" element={<Products />} />
                 <Route path="companies" element={<Companies />} />
+                <Route path="categories" element={<Categories />} />
+                <Route path="admins" element={<Admins />} />
+                <Route path="payments" element={<Payments />} />
               </Route>
             </Route>
             <Route path="/" element={<RootRedirect />} />

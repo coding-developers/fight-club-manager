@@ -30,20 +30,19 @@ import useFetch from "@/hooks/useFetch/hook";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-type StudentForm = z.infer<typeof studentSchema>;
+type AdminForm = z.infer<typeof studentSchema>;
 
 const columns = [
   { key: "full_name", label: "Nome" },
   { key: "email", label: "E-mail" },
   { key: "phone_number", label: "Telefone" },
   { key: "document", label: "Documento" },
-  { key: "level", label: "Nível" },
   { key: "status", label: "Status" },
 ];
 
-const Students = () => {
+const Admins = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [request, isLoading, data] = useFetch<Student[]>();
+  const [request, , data] = useFetch<Student[]>();
   const [requestCompanies, , dataCompanies] = useFetch<Company[]>();
   const [requestModalities, , dataModalities] = useFetch<Modality[]>();
   const [requestCreate] = useFetch<Student>();
@@ -51,34 +50,39 @@ const Students = () => {
   const [requestDelete] = useFetch<Student>();
   const { user } = useAuth();
   const { editingItem, isFormOpen, openCreate, openEdit, closeForm } =
-    useCrudState<Student>("students");
+    useCrudState<Student>("admins");
 
-  const form = useForm<StudentForm>({
+  const defaultValues: AdminForm = {
+    gym_id: 0,
+    status: "active",
+    full_name: "",
+    level: "admin",
+    document: "",
+    date_of_birth: "",
+    email: "",
+    password: "",
+    phone_number: "",
+    gender: "male",
+    avatar_url: "",
+    day_of_payment: undefined,
+    status_payment: undefined,
+    modality_ids: [],
+  };
+
+  const form = useForm<AdminForm>({
     resolver: zodResolver(studentSchema),
-    defaultValues: {
-      gym_id: 0,
-      status: "active",
-      full_name: "",
-      level: "client",
-      document: "",
-      date_of_birth: "",
-      email: "",
-      password: "",
-      phone_number: "",
-      gender: "male",
-      avatar_url: "",
-      day_of_payment: undefined,
-      status_payment: undefined,
-      modality_ids: [],
-    },
+    defaultValues,
   });
 
-  useEffect(() => {
+  const refresh = () =>
     request("/users/", {
       method: "GET",
       headers: { Authorization: `Bearer ${user.access}` },
-      params: { search: "client" },
+      params: { search: "admin" },
     });
+
+  useEffect(() => {
+    refresh();
     requestCompanies("/companies/", {
       method: "GET",
       headers: { Authorization: `Bearer ${user.access}` },
@@ -96,7 +100,7 @@ const Students = () => {
         gym_id: editingItem.gym_id,
         status: editingItem.status,
         full_name: editingItem.full_name,
-        level: editingItem.level,
+        level: "admin",
         document: editingItem.document,
         date_of_birth: editingItem.date_of_birth?.split("T")[0] ?? "",
         email: editingItem.email,
@@ -109,33 +113,12 @@ const Students = () => {
         modality_ids: editingItem.modalities ?? [],
       });
     } else {
-      form.reset({
-        gym_id: 0,
-        status: "active",
-        full_name: "",
-        level: "client",
-        document: "",
-        date_of_birth: "",
-        email: "",
-        password: "",
-        phone_number: "",
-        gender: "male",
-        avatar_url: "",
-        day_of_payment: undefined,
-        status_payment: undefined,
-        modality_ids: [],
-      });
+      form.reset(defaultValues);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingItem, isFormOpen, form]);
 
-  const refresh = () =>
-    request("/users/", {
-      method: "GET",
-      headers: { Authorization: `Bearer ${user.access}` },
-      params: { search: "client" },
-    });
-
-  const onSubmit = (formData: StudentForm) => {
+  const onSubmit = (formData: AdminForm) => {
     const body = new FormData();
     const { modality_ids, day_of_payment, ...rest } = formData;
 
@@ -144,9 +127,7 @@ const Students = () => {
     });
 
     if (day_of_payment) body.append("day_of_payment", String(day_of_payment));
-
     modality_ids?.forEach((id) => body.append("modality_ids", String(id)));
-
     if (avatarFile) body.append("avatar", avatarFile);
 
     if (editingItem) {
@@ -156,11 +137,11 @@ const Students = () => {
         body,
       })
         .then(() => {
-          toast.success("Aluno atualizado com sucesso!");
+          toast.success("Administrador atualizado com sucesso!");
           closeForm();
           refresh();
         })
-        .catch(() => toast.error("Erro ao atualizar aluno."));
+        .catch(() => toast.error("Erro ao atualizar administrador."));
     } else {
       requestCreate("/users/", {
         method: "POST",
@@ -168,11 +149,11 @@ const Students = () => {
         body,
       })
         .then(() => {
-          toast.success("Aluno cadastrado com sucesso!");
+          toast.success("Administrador cadastrado com sucesso!");
           closeForm();
           refresh();
         })
-        .catch(() => toast.error("Erro ao cadastrar aluno."));
+        .catch(() => toast.error("Erro ao cadastrar administrador."));
     }
   };
 
@@ -182,16 +163,16 @@ const Students = () => {
       headers: { Authorization: `Bearer ${user.access}` },
     })
       .then(() => {
-        toast.success("Aluno excluído com sucesso!");
+        toast.success("Administrador excluído com sucesso!");
         refresh();
       })
-      .catch(() => toast.error("Erro ao excluir aluno."));
+      .catch(() => toast.error("Erro ao excluir administrador."));
   };
 
   return (
     <DataTable
-      title="Alunos"
-      description="Gerencie os alunos da academia"
+      title="Administradores"
+      description="Gerencie os administradores da academia"
       items={data || []}
       columns={columns}
       onAdd={openCreate}
@@ -199,7 +180,7 @@ const Students = () => {
       onDelete={handleDelete}
       isFormOpen={isFormOpen}
       onCloseForm={closeForm}
-      formTitle={editingItem ? "Editar Aluno" : "Novo Aluno"}
+      formTitle={editingItem ? "Editar Administrador" : "Novo Administrador"}
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -210,9 +191,7 @@ const Students = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Nome completo</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
+                <FormControl><Input {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -226,9 +205,7 @@ const Students = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>E-mail</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
+                  <FormControl><Input {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -246,9 +223,7 @@ const Students = () => {
                       </span>
                     )}
                   </FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
+                  <FormControl><Input type="password" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -264,11 +239,7 @@ const Students = () => {
                 <FormItem>
                   <FormLabel>Telefone</FormLabel>
                   <FormControl>
-                    <MaskedInput
-                      mask="(99) 99999-9999"
-                      placeholder="(00) 00000-0000"
-                      {...field}
-                    />
+                    <MaskedInput mask="(99) 99999-9999" placeholder="(00) 00000-0000" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -281,11 +252,7 @@ const Students = () => {
                 <FormItem>
                   <FormLabel>CPF</FormLabel>
                   <FormControl>
-                    <MaskedInput
-                      mask="999.999.999-99"
-                      placeholder="000.000.000-00"
-                      {...field}
-                    />
+                    <MaskedInput mask="999.999.999-99" placeholder="000.000.000-00" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -301,9 +268,7 @@ const Students = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Data de Nascimento</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
+                  <FormControl><Input type="date" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -316,9 +281,7 @@ const Students = () => {
                   <FormLabel>Gênero</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="male">Masculino</SelectItem>
@@ -341,9 +304,7 @@ const Students = () => {
                 <FormLabel>Status</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="active">Ativo</SelectItem>
@@ -354,6 +315,7 @@ const Students = () => {
               </FormItem>
             )}
           />
+          {/* level fixo = "personal", não exibido no form */}
 
           {/* Academia */}
           <FormField
@@ -367,9 +329,7 @@ const Students = () => {
                   value={field.value ? String(field.value) : ""}
                 >
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {dataCompanies?.map((company) => (
@@ -384,62 +344,6 @@ const Students = () => {
             )}
           />
 
-          {/* Dia de Vencimento + Status de Pagamento */}
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="day_of_payment"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Dia de Vencimento</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={31}
-                      placeholder="Ex: 10"
-                      {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value === ""
-                            ? undefined
-                            : Number(e.target.value),
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="status_payment"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status de Pagamento</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value ?? ""}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="active">Em dia</SelectItem>
-                      <SelectItem value="inactive">Inativo</SelectItem>
-                      <SelectItem value="overdue">Inadimplente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
           {/* Modalidades */}
           {dataModalities && dataModalities.length > 0 && (
             <FormField
@@ -450,13 +354,9 @@ const Students = () => {
                   <FormLabel>Modalidades</FormLabel>
                   <div className="grid grid-cols-2 gap-2 rounded-md border p-3 max-h-40 overflow-y-auto">
                     {dataModalities.map((modality) => {
-                      const checked =
-                        field.value?.includes(Number(modality.id)) ?? false;
+                      const checked = field.value?.includes(Number(modality.id)) ?? false;
                       return (
-                        <div
-                          key={modality.id}
-                          className="flex items-center gap-2"
-                        >
+                        <div key={modality.id} className="flex items-center gap-2">
                           <Checkbox
                             id={`modality-${modality.id}`}
                             checked={checked}
@@ -465,16 +365,11 @@ const Students = () => {
                               if (isChecked) {
                                 field.onChange([...(field.value ?? []), id]);
                               } else {
-                                field.onChange(
-                                  (field.value ?? []).filter((v) => v !== id),
-                                );
+                                field.onChange((field.value ?? []).filter((v) => v !== id));
                               }
                             }}
                           />
-                          <label
-                            htmlFor={`modality-${modality.id}`}
-                            className="text-sm cursor-pointer"
-                          >
+                          <label htmlFor={`modality-${modality.id}`} className="text-sm cursor-pointer">
                             {modality.name}
                           </label>
                         </div>
@@ -490,19 +385,12 @@ const Students = () => {
           {/* Foto de perfil */}
           <FormItem className="flex flex-col items-center">
             <FormLabel>Foto de perfil</FormLabel>
-            <FileUpload
-              value={editingItem?.avatar_url}
-              onChange={setAvatarFile}
-            />
+            <FileUpload value={editingItem?.avatar_url} onChange={setAvatarFile} />
           </FormItem>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={closeForm}>
-              Cancelar
-            </Button>
-            <Button type="submit">
-              {editingItem ? "Salvar" : "Cadastrar"}
-            </Button>
+            <Button type="button" variant="outline" onClick={closeForm}>Cancelar</Button>
+            <Button type="submit">{editingItem ? "Salvar" : "Cadastrar"}</Button>
           </div>
         </form>
       </Form>
@@ -510,4 +398,4 @@ const Students = () => {
   );
 };
 
-export default Students;
+export default Admins;

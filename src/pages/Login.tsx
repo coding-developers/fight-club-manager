@@ -21,6 +21,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
+import { toast } from "sonner";
 
 type LoginForm = z.infer<typeof loginSchema>;
 
@@ -37,7 +38,12 @@ const Login = () => {
   }
 
   const onSubmit = async (data: LoginForm) => {
-    await login({ email: data.email, password: data.password });
+    try {
+      await login({ email: data.email, password: data.password });
+      toast.success("Login realizado com sucesso!");
+    } catch {
+      toast.error("E-mail ou senha incorretos.");
+    }
   };
 
   return (
