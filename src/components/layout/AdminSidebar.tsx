@@ -25,7 +25,7 @@ const menuItems = [
   { title: "Modalidades", url: "/admin/modalities", icon: Dumbbell },
   { title: "Professores", url: "/admin/teachers", icon: GraduationCap },
   { title: "Produtos", url: "/admin/products", icon: Package },
-  { title: "Empresas", url: "/admin/companies", icon: Building2 },
+  { title: "Academias", url: "/admin/companies", icon: Building2 },
 ];
 
 export const AdminSidebar = () => {

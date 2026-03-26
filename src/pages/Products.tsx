@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import type { Company, Product } from "@/types";
+import type { Category, Company, Product } from "@/types";
 import { useEffect } from "react";
 import useFetch from "@/hooks/useFetch/hook";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,6 +28,7 @@ const columns = [
 const Products = () => {
   const [request, , data] = useFetch<Product[]>();
   const [requestCompanies, , dataCompanies] = useFetch<Company[]>();
+  const [requestCategories, , dataCategories] = useFetch<Category[]>();
   const [requestCreate] = useFetch<Product>();
   const [requestUpdate] = useFetch<Product>();
   const [requestDelete] = useFetch<Product>();
@@ -38,7 +39,7 @@ const Products = () => {
   const form = useForm<ProductForm>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      company_id: 0, name: "", description: "", price: "", stock: 0,
+      gym_id: 0, name: "", description: "", price: "", stock: 0,
       status: "active", sku: "", image_url: "", category: 0,
     },
   });
@@ -55,9 +56,13 @@ const Products = () => {
       method: "GET",
       headers: { Authorization: `Bearer ${user.access}` },
     });
+    requestCategories("/categories/", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${user.access}` },
+    });
     if (editingItem) {
       form.reset({
-        company_id: editingItem.company_id,
+        gym_id: editingItem.gym_id,
         name: editingItem.name,
         description: editingItem.description,
         price: editingItem.price,
@@ -69,7 +74,7 @@ const Products = () => {
       });
     } else {
       form.reset({
-        company_id: 0, name: "", description: "", price: "", stock: 0,
+        gym_id: 0, name: "", description: "", price: "", stock: 0,
         status: "active", sku: "", image_url: "", category: 0,
       });
     }
@@ -127,7 +132,17 @@ const Products = () => {
           )} />
           <div className="grid grid-cols-2 gap-4">
             <FormField control={form.control} name="price" render={({ field }) => (
-              <FormItem><FormLabel>Preço</FormLabel><FormControl><Input placeholder="0.00" {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>Preço (R$)</FormLabel><FormControl>
+                <Input
+                  placeholder="0,00"
+                  value={field.value ? String(field.value).replace(".", ",") : ""}
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, "");
+                    const amount = (parseInt(digits || "0") / 100).toFixed(2);
+                    field.onChange(amount);
+                  }}
+                />
+              </FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="stock" render={({ field }) => (
               <FormItem><FormLabel>Estoque</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
@@ -138,12 +153,26 @@ const Products = () => {
               <FormItem><FormLabel>SKU</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="category" render={({ field }) => (
-              <FormItem><FormLabel>ID da Categoria</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>Categoria</FormLabel>
+                <Select
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={field.value ? String(field.value) : ""}
+                >
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    {dataCategories?.map((cat) => (
+                      <SelectItem key={cat.id} value={String(cat.id)}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              <FormMessage /></FormItem>
             )} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="company_id" render={({ field }) => (
-              <FormItem><FormLabel>Empresa</FormLabel>
+            <FormField control={form.control} name="gym_id" render={({ field }) => (
+              <FormItem><FormLabel>Academia</FormLabel>
                 <Select
                   onValueChange={(val) => field.onChange(Number(val))}
                   value={field.value ? String(field.value) : ""}

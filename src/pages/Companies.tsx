@@ -37,9 +37,8 @@ const Companies = () => {
   const form = useForm<CompanyForm>({
     resolver: zodResolver(companySchema),
     defaultValues: {
-      name: "", next_date_payment: "", last_date_payment: "", type_document: "",
-      document: "", status: "", email: "", foundation_date: "", logo: "",
-      phone_number: "", avatar_url: "", day_of_payment: 1, status_payment: "", founder: 0,
+      name: "", document: "", status: "", email: "",
+      foundation_date: "", logo: "", phone_number: "", avatar_url: "",
     },
   });
 
@@ -54,9 +53,6 @@ const Companies = () => {
     if (editingItem) {
       form.reset({
         name: editingItem.name,
-        next_date_payment: editingItem.next_date_payment?.split("T")[0] ?? "",
-        last_date_payment: editingItem.last_date_payment?.split("T")[0] ?? "",
-        type_document: editingItem.type_document,
         document: editingItem.document,
         status: editingItem.status,
         email: editingItem.email,
@@ -64,15 +60,11 @@ const Companies = () => {
         logo: editingItem.logo ?? "",
         phone_number: editingItem.phone_number,
         avatar_url: editingItem.avatar_url ?? "",
-        day_of_payment: editingItem.day_of_payment,
-        status_payment: editingItem.status_payment,
-        founder: editingItem.founder,
       });
     } else {
       form.reset({
-        name: "", next_date_payment: "", last_date_payment: "", type_document: "",
-        document: "", status: "", email: "", foundation_date: "", logo: "",
-        phone_number: "", avatar_url: "", day_of_payment: 1, status_payment: "", founder: 0,
+        name: "", document: "", status: "", email: "",
+        foundation_date: "", logo: "", phone_number: "", avatar_url: "",
       });
     }
   }, [editingItem, isFormOpen, form]);
@@ -108,8 +100,8 @@ const Companies = () => {
 
   return (
     <DataTable
-      title="Empresas"
-      description="Gerencie as empresas parceiras"
+      title="Academias"
+      description="Gerencie as academias parceiras"
       items={data || []}
       columns={columns}
       onAdd={openCreate}
@@ -117,7 +109,7 @@ const Companies = () => {
       onDelete={handleDelete}
       isFormOpen={isFormOpen}
       onCloseForm={closeForm}
-      formTitle={editingItem ? "Editar Empresa" : "Nova Empresa"}
+      formTitle={editingItem ? "Editar Academia" : "Nova Academia"}
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -135,52 +127,11 @@ const Companies = () => {
             )} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="type_document" render={({ field }) => (
-              <FormItem><FormLabel>Tipo de Documento</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
-                  <SelectContent>
-                    <SelectItem value="CNPJ">CNPJ</SelectItem>
-                    <SelectItem value="CPF">CPF</SelectItem>
-                  </SelectContent>
-                </Select>
-              <FormMessage /></FormItem>
-            )} />
             <FormField control={form.control} name="document" render={({ field }) => (
-              <FormItem><FormLabel>Documento</FormLabel><FormControl><Input placeholder="00.000.000/0000-00" {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>CNPJ / CPF</FormLabel><FormControl><Input placeholder="00.000.000/0000-00" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
             <FormField control={form.control} name="foundation_date" render={({ field }) => (
               <FormItem><FormLabel>Data de Fundação</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="founder" render={({ field }) => (
-              <FormItem><FormLabel>ID do Fundador</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="next_date_payment" render={({ field }) => (
-              <FormItem><FormLabel>Próximo Pagamento</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="last_date_payment" render={({ field }) => (
-              <FormItem><FormLabel>Último Pagamento</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="day_of_payment" render={({ field }) => (
-              <FormItem><FormLabel>Dia de Vencimento</FormLabel><FormControl><Input type="number" min={1} max={31} {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="status_payment" render={({ field }) => (
-              <FormItem><FormLabel>Status de Pagamento</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
-                  <SelectContent>
-                    <SelectItem value="paid">Pago</SelectItem>
-                    <SelectItem value="pending">Pendente</SelectItem>
-                    <SelectItem value="overdue">Atrasado</SelectItem>
-                  </SelectContent>
-                </Select>
-              <FormMessage /></FormItem>
             )} />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -191,6 +142,7 @@ const Companies = () => {
                   <SelectContent>
                     <SelectItem value="active">Ativo</SelectItem>
                     <SelectItem value="inactive">Inativo</SelectItem>
+                    <SelectItem value="suspended">Suspenso</SelectItem>
                   </SelectContent>
                 </Select>
               <FormMessage /></FormItem>

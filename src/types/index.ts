@@ -23,28 +23,36 @@ export interface AuthUser {
 // ====== Student ======
 export interface Student {
   id: string;
-  company_id: number;
+  gym_id: number;
   status: "active" | "inactive";
   full_name: string;
-  level: string;
+  level: "client" | "admin" | "personal";
   document: string;
   date_of_birth: string;
   email: string;
   password?: string;
   phone_number: string;
-  gender: string;
+  gender: "male" | "female" | "other";
   avatar_url?: string;
+  day_of_payment?: number;
+  status_payment?: "active" | "inactive" | "overdue";
+  next_date_payment?: string;
+  last_date_payment?: string;
+  modalities?: number[];
   createdAt: string;
 }
 
-export type StudentPayload = Omit<Student, "id" | "createdAt">;
+export type StudentPayload = Omit<Student, "id" | "createdAt" | "next_date_payment" | "last_date_payment" | "modalities">;
 
 // ====== Modality ======
 export interface Modality {
   id: string;
   status: string;
   name: string;
-  gym: number;
+  gym_id: number;
+  description?: string;
+  price?: string;
+  max_capacity?: number;
   createdAt: string;
 }
 
@@ -53,8 +61,8 @@ export type ModalityPayload = Omit<Modality, "id" | "createdAt">;
 // ====== Staff ======
 export interface Staff {
   id: string;
-  company_id: number;
-  student_id: number;
+  gym_id: number;
+  user_id: number;
   status: "active" | "inactive";
   hired_at: string;
   fired_at?: string;
@@ -67,7 +75,7 @@ export type StaffPayload = Omit<Staff, "id" | "createdAt">;
 // ====== Product ======
 export interface Product {
   id: string;
-  company_id: number;
+  gym_id: number;
   name: string;
   description: string;
   price: string;
@@ -81,13 +89,25 @@ export interface Product {
 
 export type ProductPayload = Omit<Product, "id" | "createdAt">;
 
+// ====== Category ======
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+// ====== Role ======
+export interface Role {
+  id: string;
+  name: string;
+  description?: string;
+  permissions?: Record<string, unknown>;
+}
+
 // ====== Company ======
 export interface Company {
   id: string;
   name: string;
-  next_date_payment: string;
-  last_date_payment: string;
-  type_document: string;
   document: string;
   status: string;
   email: string;
@@ -95,9 +115,6 @@ export interface Company {
   logo?: string;
   phone_number: string;
   avatar_url?: string;
-  day_of_payment: number;
-  status_payment: string;
-  founder: number;
   createdAt: string;
 }
 

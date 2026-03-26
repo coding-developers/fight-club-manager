@@ -54,8 +54,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     document.cookie = `refresh=${encodeURIComponent(refreshToken)}; path=/; max-age=604800; SameSite=Lax`;
   };
 
-  const handleUserState = useCallback((data: AuthUser) => {
-    setUser(data);
+  const handleUserState = useCallback((data: AuthUser & { user_id?: number; username?: string; level?: string }) => {
+    const mapped: AuthUser = {
+      id: String(data.user_id ?? data.id),
+      name: data.username ?? data.name,
+      email: data.email,
+      role: data.level ?? data.role,
+      access: data.access,
+      refresh: data.refresh,
+    };
+    setUser(mapped);
     handleSetCookies(data.access, data.refresh);
   }, []);
 

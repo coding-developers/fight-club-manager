@@ -1,28 +1,38 @@
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Dumbbell, GraduationCap, Package, Building2, TrendingUp } from "lucide-react";
+import { Users, Dumbbell, GraduationCap, Package, Building2 } from "lucide-react";
+import useFetch from "@/hooks/useFetch/hook";
+import { useAuth } from "@/contexts/AuthContext";
 
-const stats = [
-  { title: "Alunos", value: "0", icon: Users, color: "text-primary" },
-  { title: "Modalidades", value: "0", icon: Dumbbell, color: "text-accent-foreground" },
-  { title: "Professores", value: "0", icon: GraduationCap, color: "text-success" },
-  { title: "Produtos", value: "0", icon: Package, color: "text-warning" },
-  { title: "Empresas", value: "0", icon: Building2, color: "text-muted-foreground" },
-];
+interface DashboardData {
+  users: {
+    clients: number;
+    personals: number;
+    admins: number;
+  };
+  companies: number;
+  products: number;
+  modalities: number;
+}
 
 const Dashboard = () => {
-  // TODO: Fetch real stats from API
-  const storedStudents = JSON.parse(localStorage.getItem("students") || "[]");
-  const storedModalities = JSON.parse(localStorage.getItem("modalities") || "[]");
-  const storedTeachers = JSON.parse(localStorage.getItem("teachers") || "[]");
-  const storedProducts = JSON.parse(localStorage.getItem("products") || "[]");
-  const storedCompanies = JSON.parse(localStorage.getItem("companies") || "[]");
+  const { user } = useAuth();
+  const [request, isLoading, data] = useFetch<DashboardData>();
 
-  const realStats = [
-    { ...stats[0], value: String(storedStudents.length) },
-    { ...stats[1], value: String(storedModalities.length) },
-    { ...stats[2], value: String(storedTeachers.length) },
-    { ...stats[3], value: String(storedProducts.length) },
-    { ...stats[4], value: String(storedCompanies.length) },
+  useEffect(() => {
+    if (!user) return;
+    request("/dashboard/", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${user.access}` },
+    });
+  }, [user, request]);
+
+  const stats = [
+    { title: "Alunos (clientes)", value: data?.users.clients ?? 0, icon: Users, color: "text-primary" },
+    { title: "Personais", value: data?.users.personals ?? 0, icon: GraduationCap, color: "text-success" },
+    { title: "Modalidades", value: data?.modalities ?? 0, icon: Dumbbell, color: "text-accent-foreground" },
+    { title: "Produtos", value: data?.products ?? 0, icon: Package, color: "text-warning" },
+    { title: "Academias", value: data?.companies ?? 0, icon: Building2, color: "text-muted-foreground" },
   ];
 
   return (
@@ -33,33 +43,20 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {realStats.map((stat) => (
+        {stats.map((stat) => (
           <Card key={stat.title} className="border-border/50">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
               <stat.icon className={`h-5 w-5 ${stat.color}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold font-display">{stat.value}</div>
+              <div className="text-3xl font-bold font-display">
+                {isLoading ? "—" : stat.value}
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
-
-      <Card className="border-border/50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Início rápido
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Use o menu lateral para cadastrar alunos, modalidades, professores, produtos e empresas.
-            O sistema está pronto para integração com o backend — basta configurar a URL da API.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 };

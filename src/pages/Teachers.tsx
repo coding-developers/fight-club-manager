@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import type { Company, Staff } from "@/types";
+import type { Company, Role, Staff } from "@/types";
 import { useEffect } from "react";
 import useFetch from "@/hooks/useFetch/hook";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,8 +17,8 @@ import { toast } from "sonner";
 type StaffForm = z.infer<typeof staffSchema>;
 
 const columns = [
-  { key: "company_id", label: "Empresa" },
-  { key: "student_id", label: "Aluno" },
+  { key: "gym_id", label: "Academia" },
+  { key: "user_id", label: "Aluno" },
   { key: "role", label: "Função" },
   { key: "hired_at", label: "Contratado em" },
   { key: "status", label: "Status" },
@@ -27,6 +27,7 @@ const columns = [
 const Teachers = () => {
   const [request, , data] = useFetch<Staff[]>();
   const [requestCompanies, , dataCompanies] = useFetch<Company[]>();
+  const [requestRoles, , dataRoles] = useFetch<Role[]>();
   const [requestCreate] = useFetch<Staff>();
   const [requestUpdate] = useFetch<Staff>();
   const [requestDelete] = useFetch<Staff>();
@@ -37,7 +38,7 @@ const Teachers = () => {
   const form = useForm<StaffForm>({
     resolver: zodResolver(staffSchema),
     defaultValues: {
-      company_id: 0, student_id: 0, status: "active",
+      gym_id: 0, user_id: 0, status: "active",
       hired_at: "", fired_at: "", role: 0,
     },
   });
@@ -54,10 +55,14 @@ const Teachers = () => {
       method: "GET",
       headers: { Authorization: `Bearer ${user.access}` },
     });
+    requestRoles("/roles/", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${user.access}` },
+    });
     if (editingItem) {
       form.reset({
-        company_id: editingItem.company_id,
-        student_id: editingItem.student_id,
+        gym_id: editingItem.gym_id,
+        user_id: editingItem.user_id,
         status: editingItem.status,
         hired_at: editingItem.hired_at?.split("T")[0] ?? "",
         fired_at: editingItem.fired_at?.split("T")[0] ?? "",
@@ -65,7 +70,7 @@ const Teachers = () => {
       });
     } else {
       form.reset({
-        company_id: 0, student_id: 0, status: "active",
+        gym_id: 0, user_id: 0, status: "active",
         hired_at: "", fired_at: "", role: 0,
       });
     }
@@ -116,8 +121,8 @@ const Teachers = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="company_id" render={({ field }) => (
-              <FormItem><FormLabel>Empresa</FormLabel>
+            <FormField control={form.control} name="gym_id" render={({ field }) => (
+              <FormItem><FormLabel>Academia</FormLabel>
                 <Select
                   onValueChange={(val) => field.onChange(Number(val))}
                   value={field.value ? String(field.value) : ""}
@@ -133,7 +138,7 @@ const Teachers = () => {
                 </Select>
               <FormMessage /></FormItem>
             )} />
-            <FormField control={form.control} name="student_id" render={({ field }) => (
+            <FormField control={form.control} name="user_id" render={({ field }) => (
               <FormItem><FormLabel>ID do Aluno</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
           </div>
@@ -147,7 +152,21 @@ const Teachers = () => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <FormField control={form.control} name="role" render={({ field }) => (
-              <FormItem><FormLabel>ID da Função</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>Função</FormLabel>
+                <Select
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={field.value ? String(field.value) : ""}
+                >
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    {dataRoles?.map((role) => (
+                      <SelectItem key={role.id} value={String(role.id)}>
+                        {role.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              <FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="status" render={({ field }) => (
               <FormItem><FormLabel>Status</FormLabel>
